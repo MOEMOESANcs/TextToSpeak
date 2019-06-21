@@ -7,27 +7,12 @@ var passport=require('passport')
 const LocalStrategy=require('passport-local').Strategy;
 var router=express.Router();
 var bodyParser = require('body-parser')
+var archiver = require('archiver')
 const mongoose = require('mongoose');
     mongoose.connect('mongodb://127.0.0.1:27017/TextToSpeak', { useNewUrlParser: true })
         .catch((err) => { console.error(err) });
 let Models = require('./model');
 var userCount;
-
-var fs = require('fs');
-var archiver = require('archiver');
-var output = fs.createWriteStream('./example.zip');
-var archive = archiver('zip', {
-    gzip: true,
-    zlib: { level: 9 } // Sets the compression level.
-});
-
-archive.on('error', function(err) {
-  throw err;
-});
-archive.pipe(output);
-
-
-
 // parse application/x-www-form-urlencoded
 router.use(bodyParser.urlencoded({ extended: false }))
 
@@ -35,6 +20,10 @@ router.use(bodyParser.urlencoded({ extended: false }))
 router.use(passport.initialize());
 router.use(passport.session());
 
+
+
+//zip file 
+//////////////////////////
 router.get('/success',(req,res) => res.send("Welcome "+req.query.username+"!!"));
 router.get('/error',(req,res) => res.send("error logging in"));
 
@@ -321,15 +310,22 @@ router.post('/login',function(req,res,next){
   res.redirect('/loginpage')
 })
 router.post('/download',function(req,res,next){
+
   var downloadId=req.body.downloadBtn;
   // console.log(downloadId)
   recordId=downloadId.split(',');
-  console.log(recordId)
+  console.log("Record Id",recordId)
   if(recordId.length==1){
     console.log("Not selected")
   }
 
 else {
+  
+  //real
+  Models.Audiorecord.find()
+  .then((records)=>{
+    recordmany = [];
+    console.log("RecordId",recordId);
     recordId.forEach(function(data){
       if(data===""){
         console.log("finish")
@@ -340,20 +336,36 @@ else {
           else console.log("Update successfully A?D",doc)
       
         })
-        Models.Audiorecord.findOne({"_id":ObjectId(data)})
-        .then((records)=>{
-          
-          console.log("AudioName",records.audioName)
-          console.log("TextName",records.text)
-        
-        })
-        
-        .catch((err) => {
-          console.log(err)
-        })
       }
     })
+    records.forEach(function(data){
+      recordId.forEach(function(recdata){
+        if(recdata.toString() === data._id.toString()){
+          recordmany.push(data)
+        }
+      })
+    })
+    var file_system = require('fs');
+  var archiver = require('archiver');
+  
+  var output = file_system.createWriteStream(`target${Date.now()}.zip`);
+  var archive = archiver('zip');
+  output.on('close', function () {
+      console.log(archive.pointer() + ' total bytes');
+      console.log('archiver has been finalized and the output file descriptor has closed.');
+  });
+  
+  archive.on('error', function(err){
+      throw err;
+  });
+    archive.pipe(output);
+    recordmany.forEach(record=>{
+      console.log("audioname",record.audioName);
+      archive.file(`./public/uploads/${record.audioName}`,{name:`${record.audioName}`})
+    })
+    archive.finalize()
     
+  })
  }
   
  res.redirect('index')
