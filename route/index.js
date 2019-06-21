@@ -234,7 +234,7 @@ router.get('/:username',function (req,res) {
               Models.Admin.find()
               .then((admins)=>{
                 var admin=admins[0].userName
-                res.render('userdetail', { records: records,noti:noti,admin:admin})
+                res.render('userdetail', { records: records,noti:noti,admin:admin,username:username})
       
               })
             })
