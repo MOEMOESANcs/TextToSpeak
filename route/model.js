@@ -57,6 +57,7 @@ let Audiorecords = new Schema({
   userId:{type:String},
   userName:{type:String},
   audioName:{type:String},
+  textId:{type:String},
   text:{type:String},
   acceptCount:{type:Number,default:0},
   denyCount:{type:Number,default:0},

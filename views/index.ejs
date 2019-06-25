@@ -67,7 +67,7 @@
 
                 <th>Date</th>
                 <th>UserName</th>
-                <th>TextName</th>
+                <th>Text</th>
                 <th>AudioName</th>
                 <th>AcceptCount</th>
                 <th>DenyCount</th>
@@ -83,7 +83,7 @@
               <tr><th>Select</th>
                 <th>Date</th>
                 <th>UserName</th>
-                <th>TextName</th>
+                <th>Text</th>
                 <th>AudioName</th>
                 <th>AcceptCount</th>
                 <th>DenyCount</th>
@@ -113,7 +113,13 @@
                       <input type="hidden" name="id" value="<%= record._id %>">
                       <td> <%= record.date%></td>
                       <td><%= record.userName%></td>
-                      <td><%= record.text%></td>
+                      <td>
+                     
+                     
+                      <%= record.textId%>
+                      
+                      </form>
+                      </td>
                       <td><%=record.audioName%></td>
                       <td><span class="badge badge-danger"><%= record.acceptCount%> </span></td>
                       <td><span class="badge badge-danger"><%= record.denyCount%></span></td>
@@ -138,7 +144,10 @@
                     </form>
                      <td>
                          <audio id="myTune" controls>
-                          <source src="./uploads/<%=record.audioName%>">
+                          <source src="./uploads/<%=record.audioName%>" alert="aaaaaaaaa">
+                         
+                          </audio>
+                          
                     </td>
                   </tr>
 
@@ -181,9 +190,7 @@
 </a>
 
 <script type = "text/javascript"> 
-
-        
-           function select() { 
+                function select() { 
                 var elements = document.getElementsByName ("checkboxeg");
                  var count=0;
                 var values =""

@@ -303,7 +303,12 @@ module.exports = function (express,app) {
                                                     records.status = "Pending"
                                                     records.userId = user._id;
                                                     records.userName = user.userName;
-                                                    records.text = req.body.Text;
+                                                    records.textId = req.body.Text;
+                                                    var tid=req.body.Text
+                                              Models.Text.findOne({_id:ObjectId(tid)},function(err,res){
+                                               if(err)throw err;
+                                                records.text=res.value;
+                                              })
                                                     records.audioName = files[0].filename;
                                                     records.acceptCount = 0;
                                                     records.denyCount = 0;
@@ -343,6 +348,11 @@ module.exports = function (express,app) {
                                                         records.userId = user._id;
                                                         records.userName = user.userName;
                                                         records.text = arr[i];
+                                                        var tid=arr[i]
+                                              Models.Text.findOne({_id:ObjectId(tid)},function(err,res){
+                                               if(err)throw err;
+                                                records.text=res.value;
+                                              })
                                                         records.audioName = files[i].filename;
                                                         records.acceptCount = 0;
                                                         records.denyCount = 0;

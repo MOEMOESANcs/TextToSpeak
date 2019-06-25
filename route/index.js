@@ -22,8 +22,7 @@ router.use(passport.session());
 
 
 
-//zip file 
-//////////////////////////
+
 router.get('/success',(req,res) => res.send("Welcome "+req.query.username+"!!"));
 router.get('/error',(req,res) => res.send("error logging in"));
 
@@ -322,10 +321,7 @@ router.post('/download',function(req,res,next){
 else {
   
   //real
-  Models.Audiorecord.find()
-  .then((records)=>{
-    recordmany = [];
-    console.log("RecordId",recordId);
+  console.log("RecordId",recordId);
     recordId.forEach(function(data){
       if(data===""){
         console.log("finish")
@@ -338,41 +334,39 @@ else {
         })
       }
     })
-    records.forEach(function(data){
-      recordId.forEach(function(recdata){
-        if(recdata.toString() === data._id.toString()){
-          recordmany.push(data)
-        }
-      })
-    })
-    var file_system = require('fs');
+  Models.Audiorecord.find({downloadStatus:"Downloaded"})
+  .then((records)=>{
+   //audio Zip 
+  var file_system = require('fs');
   var archiver = require('archiver');
-  
-  var output = file_system.createWriteStream(`target${Date.now()}.zip`);
+ var csvwriter=require('csv-write-stream')
+ var writer=csvwriter()
+ writer.pipe(file_system.createWriteStream('mytext.csv'))
+  var output = file_system.createWriteStream(`targetAudio.zip`);
   var archive = archiver('zip');
   output.on('close', function () {
       console.log(archive.pointer() + ' total bytes');
       console.log('archiver has been finalized and the output file descriptor has closed.');
   });
+
   
   archive.on('error', function(err){
       throw err;
   });
     archive.pipe(output);
-    recordmany.forEach(record=>{
+    records.forEach(record=>{
       console.log("audioname",record.audioName);
-      archive.file(`./public/uploads/${record.audioName}`,{name:`${record.audioName}`})
+        archive.file(`./public/uploads/${record.audioName}`,{name:`${record.audioName}`})
+        writer.write({Id:`${record.textId}`,Text:`${record.text}`,Audio:`${record.audioName}`})
     })
+    writer.end();
+    archive.file(`./mytext.csv`)
     archive.finalize()
-    
-  })
+      })
  }
   
  res.redirect('index')
   })
-
-
-
 
 
 
@@ -640,7 +634,7 @@ router.post('/api/posts',(req,res)=>{
     }
 
 });
-router.post('/api/posts/sendaudio', upload.array('myFiles', 12,),(req,res)=>{
+router.post('/api/posts/sendaudio', upload.array('myFiles', 13,),(req,res)=>{
   //response the text from the mongo database
   var header = req.headers['authorization'];
   if(typeof header=== 'undefined'){
@@ -680,12 +674,19 @@ router.post('/api/posts/sendaudio', upload.array('myFiles', 12,),(req,res)=>{
                                       else if (files.length ===1){
                                           if(!req.body.Text){ res.send("File and Text Are does not Match")}
                                           else if(typeof req.body.Text === "string"){
+                                            Models.Text.findOne({_id:ObjectId(req.body.Text)})
+                                            .then((texts)=>{
                                               let records = new Models.Audiorecord;
                                               records.status = "Pending"
                                               records.userId = user._id;
                                               records.userName = user.userName;
-                                              records.text = req.body.Text;
+
+                                              records.textId = req.body.
+                                              records.text=texts.value;
                                               records.audioName = files[0].filename;
+
+                                              
+
                                               records.save(function (err,record) {
                                                   if(err)console.log("Error found in saving record");
                                                   else {
@@ -693,6 +694,11 @@ router.post('/api/posts/sendaudio', upload.array('myFiles', 12,),(req,res)=>{
                                                       console.log("RECORD1",record)
                                               }
                                               });
+                                            })
+                                              .catch((err)=>{
+                                                console.log(err);
+                                                res.json({Message:"Sorry"})
+                                              })
                                               res.send(files)
                                           }
                                           else {
@@ -716,12 +722,17 @@ router.post('/api/posts/sendaudio', upload.array('myFiles', 12,),(req,res)=>{
                                               var output = "";
                                               var arr = req.body.Text;
                                               for(let i =0;i<files.length;i++){
+                                                  Models.Text.findOne({_id:ObjectId(arr[i])})
+                                                  .then((texts)=>{
                                                   let records = new Models.Audiorecord;
                                                   records.status = "Pending"
                                                   records.userId = user._id;
                                                   records.userName = user.userName;
-                                                  records.text = arr[i];
+
+                                                  records.textId = arr[i];
+                                                  records.text=texts.value;
                                                   records.audioName = files[i].filename;
+
                                                   
                                                   records.save(function (err,record) {
                                                       if(err)console.log("Error found in saving record");
@@ -730,6 +741,12 @@ router.post('/api/posts/sendaudio', upload.array('myFiles', 12,),(req,res)=>{
                                                           console.log("Record",record)
                                                       }
                                                   });
+                                                  })
+                                                  .catch((err)=>{
+                                                    res.json({Message:"Error"})
+                                                  })
+                                                  
+                                                  
                                               }
                                               res.send(files);
           
@@ -946,9 +963,7 @@ router.post('/api/posts/sendaudioconfirm',(req,res)=>{
         else res.sendStatus(404,"Page Not Found");
       }
 })
-router.post('/download',function(req,res,next){
-  var download=req.body.downloadBtn;
-  console.log(download)
-  res.redirect('index')
-})
+
+
+
 module.exports=router;
