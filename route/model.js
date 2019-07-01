@@ -53,11 +53,12 @@ exports.Text = Text;
 let Audiorecords = new Schema({
   downloadStatus:{type:String,default:"undownload"},
   date:{type:Date,default:Date.now()},
+  show:{type:String,default:"un"},
   status:{type:String},
   userId:{type:String},
   userName:{type:String},
   audioName:{type:String},
-  textId:{type:String},
+  textid:{type:String},
   text:{type:String},
   acceptCount:{type:Number,default:0},
   denyCount:{type:Number,default:0},

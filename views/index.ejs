@@ -67,7 +67,7 @@
 
                 <th>Date</th>
                 <th>UserName</th>
-                <th>Text</th>
+                <th>Text </th>
                 <th>AudioName</th>
                 <th>AcceptCount</th>
                 <th>DenyCount</th>
@@ -80,7 +80,8 @@
               </tr>
               </thead>
               <tfoot>
-              <tr><th>Select</th>
+              <tr>
+              <th>Select</th>
                 <th>Date</th>
                 <th>UserName</th>
                 <th>Text</th>
@@ -88,7 +89,7 @@
                 <th>AcceptCount</th>
                 <th>DenyCount</th>
                 <th>NotSure</th>
-                  <th>Status</th>
+                <th>Status</th>
                 
                 <th>Submit</th>
                 <th>Play</th>
@@ -114,12 +115,20 @@
                       <td> <%= record.date%></td>
                       <td><%= record.userName%></td>
                       <td>
+                     <% if(record.show=="un"){%>
+                     <%= record.textid%>
+                        <button type="submit" formaction="/show" method="post"  id="<%= record.textid%>" name="show" value="ok">Text</button>
                      
-                     
-                      <%= record.textId%>
+                     <% }else{%>
+
+                       <label><%=record.text%></label>
+                    <button type="submit" formaction="/show" method="post" id="<%= record.textid%>" name="show" value="un">ID</button>
+
+                      <% }%>
                       
-                      </form>
                       </td>
+                      
+
                       <td><%=record.audioName%></td>
                       <td><span class="badge badge-danger"><%= record.acceptCount%> </span></td>
                       <td><span class="badge badge-danger"><%= record.denyCount%></span></td>
@@ -144,7 +153,7 @@
                     </form>
                      <td>
                          <audio id="myTune" controls>
-                          <source src="./uploads/<%=record.audioName%>" alert="aaaaaaaaa">
+                          <source src="./uploads/<%=record.audioName%>">
                          
                           </audio>
                           
@@ -190,6 +199,8 @@
 </a>
 
 <script type = "text/javascript"> 
+  
+
                 function select() { 
                 var elements = document.getElementsByName ("checkboxeg");
                  var count=0;
