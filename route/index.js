@@ -20,10 +20,6 @@ router.use(bodyParser.urlencoded({ extended: false }))
 router.use(passport.initialize());
 router.use(passport.session());
 
-
-
-//zip file 
-//////////////////////////
 router.get('/success',(req,res) => res.send("Welcome "+req.query.username+"!!"));
 router.get('/error',(req,res) => res.send("error logging in"));
 
@@ -126,7 +122,6 @@ router.get('/index',function(req,res,next){
     })
   }
 })
-
 
 router.get('/charts',function(req,res,next){
   if(userCount==0){
@@ -286,7 +281,7 @@ router.get('/:username',function (req,res) {
   }
 })
 router.post('/show',function(req,res,next) {
-  
+  //to convert text to id
   var showText=req.body.id;
     console.log(showText);
   var ss=req.body.show;
@@ -296,8 +291,21 @@ router.post('/show',function(req,res,next) {
     else console.log("Update successfully A?D",doc)
 
   })
-  
-res.redirect('/index')
+
+  Models.Audiorecord.findOne({_id:ObjectId(showText)},function(err,doc){
+        if(err) throw err;
+        else{
+             if(doc.status==="Pending"){
+               
+               res.redirect('index') 
+                }
+              else{  
+                 res.redirect('confirmRecords');
+                
+               
+                 }
+        }
+        })
 
 
 })
@@ -307,12 +315,15 @@ router.post('/index',function(req,res,next) {
     console.log(status)
   var resid=req.body.id;
     console.log(resid);
+  // status update
 
   Models.Audiorecord.updateMany({_id:ObjectId(resid)},{$set:{status:status}},function(err,doc) {
     if(err) throw err
     else console.log("Update successfully A?D",doc)
 
-  })
+   })
+   // index table redirect
+
   Models.Audiorecord.find({status:'Pending'})
     .then((records) => {
 
@@ -335,6 +346,7 @@ router.post('/index',function(req,res,next) {
       res.render('index', { records: [] })
     })
 
+  //userdeatil total count increase
 
   Models.Audiorecord.find({_id:ObjectId(resid) }, function(err, res) {
     if (err) throw err;
@@ -378,14 +390,30 @@ router.post('/download',function(req,res,next){
 
       }else{
         Models.Audiorecord.updateMany({_id:ObjectId(data)},{$set:{downloadStatus:"Downloaded"}},function(err,doc) {
-          if(err) throw err
-          else console.log("Update successfully A?D",doc)
-      
+          if(err) throw err;
+          
         })
+       
+      
+        
       }
     })
-  
-  //real
+    console.log(recordId[0])
+     Models.Audiorecord.findOne({_id:ObjectId(recordId[0])},function(err,doc){
+        if(err) throw err;
+        else{
+             if(doc.status==="Pending"){
+               
+               res.redirect('index') 
+                }
+              else{  
+                 res.redirect('confirmRecords');
+                
+               
+                 }
+        }
+        })
+  //zip file
   Models.Audiorecord.find({downloadStatus:"Downloaded"})
   .then((records)=>{
     var file_system = require('fs');
@@ -419,8 +447,8 @@ router.post('/download',function(req,res,next){
     
   })
  }
-  
- res.redirect('index')
+ //for redirct current page
+
   })
 
 
